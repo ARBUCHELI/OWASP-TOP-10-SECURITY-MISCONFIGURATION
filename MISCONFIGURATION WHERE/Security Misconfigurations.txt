@@ -1,0 +1,27 @@
+# SECURITY MISCONFIGURATIONS
+----------------------------
+
+* An Introduction to Security Misconfigurations
+-----------------------------------------------
+When we think about secure development, it is common to immediately jump to secure coding, sanitization, and code-level access controls. Unfortunately, in this day and age, application 
+stacks rarely exist in a space that only includes developer-written code. Rather, developers will leverage popular frameworks to help expedite the coding, debugging, and production 
+process. To better support developers, many tools and frameworks will include functionality far past basic code logic, and many will include debugging capabilities, administration 
+portals, and other useful services designed to aid during development.
+
+While these features may be incredibly useful when developing, they can pose a significant risk if not properly controlled once a system moves to a production environment. Failure to 
+properly control these features and others may lead to security misconfigurations.
+
+Within the OWASP documentation, there are several common misconfigurations that developers need to consider, such as:
+
+	. Unnecessary features enabled
+	. Default accounts enabled and unchanged
+	. Verbose Error Handling
+	. Old libraries with out-of-date software
+	. A lack of security settings and headers
+
+The impact of those misconfigurations can vary widely. They can range from information disclosure to complete system takeovers.
+
+The following lesson will explore a Python web application vulnerable to several security misconfigurations.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
