@@ -78,5 +78,118 @@ Brought to you by DON'T PANIC, your friendly Werkzeug powered traceback interpre
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+* Mitigating Common Security Misconfigurations
+----------------------------------------------
+Now that we’ve seen an example of poorly configured code, let’s look at a more secure version that does not suffer from these same security misconfigurations.
 
+A quick review of the code finds that the operating system diagnostic page was removed entirely, and the error handling components have been stripped down to exclude any verbose error 
+messages. This combination greatly reduces the risk of information disclosure issues.
+
+In general, best practices related to security misconfigurations will include the following:
+
+	. Disable any detailed stack trace/error logs
+	. Remove/disable any debug/non-necessary services
+	.Remove or modify any default accounts/credentials
+	. Update your software
+
+While the exact process behind fixing security misconfigurations will vary greatly based on the language, library, and systems in use, the final output is the same. Remove any unnecessary 
+features that may provide attackers with useful tools or information. Remember, tools that make a developer’s or administrator’s life easier can also be abused by an attacker to damage a 
+system more effectively.
+
+app.py
+------
+import subprocess
+from flask import Flask, request, jsonify
+import platform
+
+app = Flask(__name__)
+
+@app.route('/send_command', methods=['GET'])
+def send_command():
+    response = """Please Enter The Command "ping -n4 localhost" to check system status:
+        <form method="post" action="/execute">
+             <input id="command" type="text" class="searchField" name="command" placeholder="Enter Command: ">
+             <input type="submit" class="submit" value="Submit"> 
+        </form>
+    """
+    return response
+
+@app.route('/execute', methods=['POST'])
+def execute_command():
+    command = request.form.get('command')
+    if not command or command.strip() == '':
+        return "Command parameter is missing or empty.", 400
+
+    if 'localhost' not in command:
+        return "Invalid command parameter.", 400
+
+    try:
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        output, _ = process.communicate()
+        exit_code = process.returncode
+
+        if exit_code == 0:
+            return output
+        else:
+            return "Command execution error.", 500
+    except Exception:
+        return "Failed to execute command.", 500
+
+@app.route('/', methods=['GET'])
+def welcome():
+    response = "WELCOME!"
+
+    return response
+
+if __name__ == '__main__':
+    app.run(host='localhost', port=8080)
+
+secured_app.java
+----------------
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public class CommandExecutorServlet extends HttpServlet {
+
+    private static final long serialVersionUID = 1L;
+    
+    private static final String LOCALHOST = "localhost";
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String command = request.getParameter("command");
+        
+        if (command != null && command.contains(LOCALHOST)) {
+            try {
+                Process process = Runtime.getRuntime().exec(command);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.getWriter().append(line).append("\n");
+                }
+            } catch (IOException e) {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred while executing the command.");
+                e.printStackTrace();
+            }
+        } else {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Command must contain the string 'localhost'.");
+        }
+    }
+}
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+* Conclusion
+------------
+While a basic stack trace error message may not seem dangerous, a skilled attacker can abuse the information revealed here to better target, exploit, and damage a system. Any information 
+or access that an attacker can obtain is a valuable resource that can have unfounded and unpredictable effects. Security misconfigurations can take on many forms, but we can generally 
+address their forms by restricting access to information and built-in tools.
 
