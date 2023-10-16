@@ -25,3 +25,58 @@ The following lesson will explore a Python web application vulnerable to several
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+* Exploring Common Security Misconfigurations
+---------------------------------------------
+In our current example, we have a Python web application. It may not be clear what the app’s purpose is, but we’ll see how quickly we can learn about the application due to several basic 
+misconfigurations.
+
+Let’s take some time to interact with the application, probing for potential security issues. Try any of the following:
+
+	. In the browser, try sending some basic requests to the system.
+	. In the browser, try sending a handful of different strings. Submit a string such as “test”, “;”, or “/“.
+
+By doing any of the above tasks, we should be able to identify a few common security misconfigurations.
+
+Our first serious security misconfiguration is that some unnecessary features are enabled. If we send a /GET request to this server by replacing the browser’s URL with localhost:8080/, we 
+should notice that the server returns important information. One portion includes information about the operating system. This includes the name, version, and the underlying architecture. 
+
+The combination of this information constitutes a serious information disclosure issue. Data included in this response could aid an attacker in various ways. With knowledge of the 
+operating system, an attacker could easily look for known exploits and vulnerabilities. A system takeover will be trivial if the operating system is vulnerable to a public exploit.
+
+All of this information may help an attacker compromise the underlying operating system.
+
+Continuing, we can also see another serious security misconfiguration related to the operating system execution. The server returns a verbose stack trace if we insert the following 
+ping -n4 localhost. As with the other debugging data returned, this also constitutes a serious information disclosure risk. By revealing a stack trace in this manner, an attacker can 
+easily glean information about a system’s operational flow and logic. Understanding this gives an attacker a huge advantage when targeting your code.
+
+* Response
+----------
+flask.cli.NoAppException
+flask.cli.NoAppException: Could not import "app".
+
+Traceback (most recent call last)
+File "/usr/local/lib/python3.6/dist-packages/flask/cli.py", line 240, in locate_app
+__import__(module_name)
+During handling of the above exception, another exception occurred:
+File "/usr/local/lib/python3.6/dist-packages/flask/cli.py", line 343, in __call__
+rv = self._load_unlocked()
+File "/usr/local/lib/python3.6/dist-packages/flask/cli.py", line 330, in _load_unlocked
+self._app = rv = self.loader()
+File "/usr/local/lib/python3.6/dist-packages/flask/cli.py", line 388, in load_app
+app = locate_app(self, import_name, name)
+File "/usr/local/lib/python3.6/dist-packages/flask/cli.py", line 250, in locate_app
+raise NoAppException('Could not import "{name}".'.format(name=module_name))
+flask.cli.NoAppException: Could not import "app".
+The debugger caught an exception in your WSGI application. You can now look at the traceback which led to the error.
+To switch between the interactive traceback and the plaintext one, you can click on the "Traceback" headline. From the text traceback you can also create a paste of it. For code execution mouse-over the frame you want to debug and click on the console icon on the right side.
+
+You can execute arbitrary Python code in the stack frames and there are some extra helpers available for introspection:
+
+dump() shows all variables in the frame
+dump(obj) dumps all that's known about the object
+Brought to you by DON'T PANIC, your friendly Werkzeug powered traceback interpreter.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
